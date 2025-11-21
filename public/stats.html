@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TinyLink · Stats</title>
+    <link rel="icon" type="image/svg+xml" href="https://fav.farm/📊" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-[#fbf7f5] text-[#1d1d1f]">
+    <div class="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-10">
+      <header>
+        <a href="/" class="text-sm text-gray-500 hover:text-gray-900">← Back to dashboard</a>
+      </header>
+
+      <section class="rounded-3xl bg-white/80 p-8 shadow-sm ring-1 ring-black/5">
+        <p class="text-xs uppercase tracking-[0.3em] text-gray-400">Stats</p>
+        <h1 class="text-4xl font-semibold tracking-tight text-[#1d1d1f]" id="stats-code">—</h1>
+        <p class="text-sm text-gray-500" id="stats-created"></p>
+      </section>
+
+      <section class="grid gap-6 md:grid-cols-2">
+        <article class="rounded-3xl bg-white/90 p-6 shadow-sm ring-1 ring-black/5">
+          <p class="text-xs uppercase tracking-widest text-gray-400">Destination</p>
+          <a
+            id="stats-destination"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="mt-2 block break-words text-lg font-medium text-blue-600 hover:underline"
+          >
+            —
+          </a>
+        </article>
+        <article class="rounded-3xl bg-white/90 p-6 shadow-sm ring-1 ring-black/5">
+          <p class="text-xs uppercase tracking-widest text-gray-400">Total clicks</p>
+          <p id="stats-clicks" class="mt-2 text-5xl font-semibold">0</p>
+          <p class="text-sm text-gray-500">
+            Last clicked <span id="stats-last-clicked" class="font-medium text-gray-800">—</span>
+          </p>
+        </article>
+      </section>
+
+      <section class="rounded-3xl bg-white/90 p-6 shadow-sm ring-1 ring-black/5">
+        <p class="text-xs uppercase tracking-[0.3em] text-gray-400">Share link</p>
+        <div class="mt-4 flex flex-col gap-3 md:flex-row">
+          <input
+            id="share-input"
+            readonly
+            class="flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-800 outline-none"
+            value="Loading…"
+          />
+          <button
+            id="copy-btn"
+            class="rounded-2xl bg-[#1d1d1f] px-6 py-3 text-sm font-semibold text-white transition hover:bg-black"
+          >
+            Copy
+          </button>
+        </div>
+        <p id="copy-feedback" class="mt-2 text-sm text-gray-500"></p>
+      </section>
+    </div>
+
+    <script type="module" src="/stats.js"></script>
+  </body>
+</html>
+

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TinyLink Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="https://fav.farm/🔗" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-[#fbf7f5] text-[#1d1d1f]">
+    <div class="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10">
+      <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-gray-400">Dashboard</p>
+          <h1 class="text-3xl font-semibold tracking-tight text-[#1d1d1f]">TinyLink Dashboard</h1>
+          <p class="text-gray-500">Manage links, track clicks, and inspect system status.</p>
+        </div>
+        <a
+          href="/healthz"
+          class="inline-flex items-center justify-center rounded-full border border-gray-200 px-5 py-2 text-sm font-medium text-gray-600 transition hover:border-gray-900 hover:text-gray-900"
+        >
+          Health check →
+        </a>
+      </header>
+
+      <section class="rounded-2xl bg-white/80 p-6 shadow-sm ring-1 ring-black/5" id="create-card">
+        <h2 class="text-lg font-semibold text-[#1d1d1f]">Add a new link</h2>
+        <p class="text-sm text-gray-500">Paste a long URL and optionally choose your own short code.</p>
+
+        <form id="create-form" class="mt-5 grid gap-4 md:grid-cols-[3fr,1.2fr,auto] md:items-end">
+          <label class="flex flex-col gap-2 text-sm font-medium text-gray-700 md:col-span-2">
+            Destination URL
+            <input
+              id="destination-input"
+              type="url"
+              placeholder="https://example.com/some/very/long/path"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base text-gray-800 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+              required
+            />
+          </label>
+          <label class="flex flex-col gap-2 text-sm font-medium text-gray-700">
+            Custom code (optional)
+            <input
+              id="custom-code-input"
+              type="text"
+              minlength="3"
+              maxlength="32"
+              placeholder="3-32 chars, letters/numbers/-/_"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-base text-gray-800 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+            />
+          </label>
+          <button
+            type="submit"
+            class="h-[52px] rounded-xl bg-[#1d1d1f] px-6 text-base font-semibold text-white transition hover:bg-black md:self-end"
+          >
+            Shorten
+          </button>
+        </form>
+
+        <p id="create-feedback" class="mt-4 text-sm font-medium"></p>
+      </section>
+
+      <section class="rounded-2xl bg-white/80 p-6 shadow-sm ring-1 ring-black/5">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div class="relative flex-1">
+            <input
+              type="search"
+              id="search-input"
+              placeholder="Search by code or URL"
+              class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+            />
+            <span class="pointer-events-none absolute inset-y-0 right-4 flex items-center text-xs uppercase tracking-widest text-gray-400">Search</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <select
+              id="sort-select"
+              class="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="most-clicked">Most clicked</option>
+              <option value="least-clicked">Least clicked</option>
+            </select>
+            <button
+              id="refresh-btn"
+              class="rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-600 transition hover:border-gray-900 hover:text-gray-900"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-5 overflow-hidden rounded-2xl border border-gray-100">
+          <table class="min-w-full divide-y divide-gray-100 text-sm">
+            <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <tr>
+                <th class="px-4 py-3">Short code</th>
+                <th class="px-4 py-3">Target URL</th>
+                <th class="px-4 py-3 text-center">Total clicks</th>
+                <th class="px-4 py-3">Last clicked time</th>
+                <th class="px-4 py-3 text-center">Stats</th>
+                <th class="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="links-table-body" class="divide-y divide-gray-50 bg-white text-gray-700">
+              <tr>
+                <td colspan="6" class="px-4 py-6 text-center text-sm text-gray-500">Loading links…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <template id="link-row-template">
+      <tr>
+        <td class="px-4 py-4 font-semibold text-gray-900">
+          <button class="show-shortcode underline-offset-4 hover:underline"></button>
+        </td>
+        <td class="px-4 py-4">
+          <a href="#" class="truncate text-sm text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer"></a>
+        </td>
+        <td class="px-4 py-4 text-center text-base font-semibold"></td>
+        <td class="px-4 py-4 text-sm text-gray-500"></td>
+        <td class="px-4 py-4 text-center">
+          <button class="stats-btn rounded-xl border border-gray-200 px-4 py-2 text-xs font-semibold text-gray-700 transition hover:border-gray-900 hover:text-gray-900">
+            View
+          </button>
+        </td>
+        <td class="px-4 py-4">
+          <div class="flex shrink-0 items-center gap-2 justify-end">
+            <button class="delete-btn rounded-xl border border-red-200 px-4 py-2 text-xs font-semibold text-red-500 transition hover:border-red-500 hover:text-white hover:bg-red-500">
+              Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+    </template>
+
+    <div
+      id="short-modal"
+      class="fixed inset-0 z-30 hidden items-center justify-center bg-black/30 backdrop-blur-sm flex"
+    >
+      <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-xl ring-1 ring-black/5">
+        <div class="flex items-start justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-[0.3em] text-gray-400">Short link</p>
+            <h3 id="modal-shortcode" class="text-2xl font-semibold text-[#1d1d1f]">—</h3>
+          </div>
+          <button id="modal-close" class="text-sm text-gray-500 hover:text-gray-900">✕</button>
+        </div>
+        <p class="mt-2 text-sm text-gray-500">Copy or open this TinyLink.</p>
+        <div class="mt-4 flex flex-col gap-3">
+          <input
+            id="modal-shortlink"
+            readonly
+            class="rounded-2xl border border-gray-200 px-4 py-3 text-sm text-gray-800 outline-none"
+          />
+          <div class="flex gap-3">
+            <button
+              id="modal-copy"
+              class="flex-1 rounded-2xl bg-[#1d1d1f] px-4 py-3 text-sm font-semibold text-white transition hover:bg-black"
+            >
+              Copy
+            </button>
+            <button
+              id="modal-open"
+              class="flex-1 rounded-2xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-800 transition hover:border-gray-900 hover:text-gray-900"
+            >
+              Open
+            </button>
+          </div>
+          <p id="modal-feedback" class="text-sm text-gray-500"></p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
