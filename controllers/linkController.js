@@ -86,15 +86,19 @@ export const redirectUrl = async (req, res) => {
   const { code } = req.params;
 
   try {
+    // Check if the link exists in the database
     const result = await pool.query(
       "SELECT original_url FROM links WHERE short_code = $1",
       [code]
     );
 
+    // If link doesn't exist (e.g., after deletion), return 404
+    // This ensures deleted links no longer redirect
     if (result.rowCount === 0) {
       return res.status(404).send("Short URL not found");
     }
 
+    // Link exists - increment click count and redirect
     await pool.query(
       "UPDATE links SET clicks = clicks + 1, last_clicked = NOW() WHERE short_code = $1",
       [code]
@@ -140,6 +144,8 @@ export const deleteLink = async (req, res) => {
   const { code } = req.params;
 
   try {
+    // Delete the link from the database
+    // After deletion, accessing /{code} will return 404
     const result = await pool.query("DELETE FROM links WHERE short_code = $1", [
       code,
     ]);

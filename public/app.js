@@ -44,7 +44,7 @@ const setFeedback = (message, type = "info") => {
 const renderEmptyState = (message) => {
   tableBody.innerHTML = `
     <tr>
-      <td colspan="5" class="px-4 py-6 text-center text-sm text-gray-500">${message}</td>
+      <td colspan="6" class="px-4 py-6 text-center text-sm text-gray-500">${message}</td>
     </tr>
   `;
 };
@@ -60,12 +60,29 @@ const renderLinks = (links) => {
   links.forEach((link) => {
     const row = rowTemplate.content.cloneNode(true);
     const cells = row.querySelectorAll("td");
+    
+    // Verify we have all 6 cells
+    if (cells.length !== 6) {
+      console.error(`Expected 6 table cells, found ${cells.length} for link:`, link.short_code);
+    }
+    
     const clicksCell = cells[2];
     const lastClickedCell = cells[3];
     const targetAnchor = row.querySelector("a");
     const statsBtn = row.querySelector(".stats-btn");
     const deleteBtn = row.querySelector(".delete-btn");
     const shortcodeBtn = row.querySelector(".show-shortcode");
+
+    if (!deleteBtn) {
+      console.error("Delete button not found in template for link:", link.short_code);
+      return;
+    }
+    
+    // Ensure the Actions cell (cells[5]) is visible
+    if (cells[5]) {
+      cells[5].style.display = "table-cell";
+      cells[5].style.visibility = "visible";
+    }
 
     const shortLink = `${window.location.origin}/${link.short_code}`;
 
@@ -78,15 +95,25 @@ const renderLinks = (links) => {
     clicksCell.textContent = link.clicks ?? 0;
     lastClickedCell.textContent = formatDateTime(link.last_clicked);
 
-    statsBtn.addEventListener("click", () => {
-      window.location.href = `/code/${link.short_code}`;
-    });
+    if (statsBtn) {
+      statsBtn.textContent = "View";
+      statsBtn.addEventListener("click", () => {
+        window.location.href = `/code/${link.short_code}`;
+      });
+    }
 
+    deleteBtn.textContent = "🗑️ Delete";
+    deleteBtn.style.display = "inline-block";
+    deleteBtn.style.visibility = "visible";
     deleteBtn.addEventListener("click", async () => {
       const confirmed = window.confirm(
-        `Delete ${link.short_code}? This action cannot be undone.`
+        `Delete link with code "${link.short_code}"?\n\nThis will permanently delete:\n• Short code: ${link.short_code}\n• Target URL: ${link.original_url}\n• All click statistics\n\nThis action cannot be undone.`
       );
       if (!confirmed) return;
+
+      deleteBtn.disabled = true;
+      deleteBtn.textContent = "Deleting...";
+      deleteBtn.classList.add("opacity-50");
 
       try {
         const response = await fetch(`/api/links/${link.short_code}`, {
@@ -96,9 +123,13 @@ const renderLinks = (links) => {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.error || "Failed to delete link");
         }
+        setFeedback(`Successfully deleted link: ${link.short_code}`, "success");
         await fetchLinks();
       } catch (error) {
         setFeedback(error.message, "error");
+        deleteBtn.disabled = false;
+        deleteBtn.textContent = "Delete";
+        deleteBtn.classList.remove("opacity-50");
       }
     });
 

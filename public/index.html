@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TinyLink Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="https://fav.farm/🔗" />
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
   <body class="min-h-screen bg-[#fbf7f5] text-[#1d1d1f]">
     <div class="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10">
       <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -86,20 +86,20 @@
               class="rounded-xl border border-gray-200 px-4 py-3 text-sm font-medium text-gray-600 transition hover:border-gray-900 hover:text-gray-900"
             >
               Refresh
-            </button>
+    </button>
           </div>
         </div>
 
-        <div class="mt-5 overflow-hidden rounded-2xl border border-gray-100">
-          <table class="min-w-full divide-y divide-gray-100 text-sm">
+        <div class="mt-5 overflow-x-auto rounded-2xl border border-gray-100">
+          <table class="w-full divide-y divide-gray-100 text-sm" style="min-width: 1000px;">
             <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
               <tr>
-                <th class="px-4 py-3">Short code</th>
-                <th class="px-4 py-3">Target URL</th>
-                <th class="px-4 py-3 text-center">Total clicks</th>
-                <th class="px-4 py-3">Last clicked time</th>
-                <th class="px-4 py-3 text-center">Stats</th>
-                <th class="px-4 py-3 text-right">Actions</th>
+                <th class="px-4 py-3 whitespace-nowrap">Short code</th>
+                <th class="px-4 py-3 whitespace-nowrap">Target URL</th>
+                <th class="px-4 py-3 text-center whitespace-nowrap">Total clicks</th>
+                <th class="px-4 py-3 whitespace-nowrap">Last clicked time</th>
+                <th class="px-4 py-3 text-center whitespace-nowrap">Stats</th>
+                <th class="px-4 py-3 text-right whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody id="links-table-body" class="divide-y divide-gray-50 bg-white text-gray-700">
@@ -110,7 +110,7 @@
           </table>
         </div>
       </section>
-    </div>
+  </div>
 
     <template id="link-row-template">
       <tr>
@@ -127,10 +127,10 @@
             View
           </button>
         </td>
-        <td class="px-4 py-4">
+        <td class="px-4 py-4" style="min-width: 120px;">
           <div class="flex shrink-0 items-center gap-2 justify-end">
-            <button class="delete-btn rounded-xl border border-red-200 px-4 py-2 text-xs font-semibold text-red-500 transition hover:border-red-500 hover:text-white hover:bg-red-500">
-              Delete
+            <button class="delete-btn rounded-xl border-2 border-red-400 bg-red-100 px-4 py-2 text-xs font-semibold text-red-700 transition hover:border-red-600 hover:text-white hover:bg-red-600 shadow-sm" title="Delete this link" style="display: inline-block !important; visibility: visible !important; opacity: 1 !important; min-width: 90px;">
+              🗑️ Delete
             </button>
           </div>
         </td>
@@ -176,5 +176,5 @@
     </div>
 
     <script type="module" src="/app.js"></script>
-  </body>
+</body>
 </html>
