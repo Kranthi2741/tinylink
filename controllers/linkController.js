@@ -1,7 +1,18 @@
 import { pool } from "../db.js";
 import { nanoid } from "nanoid";
 
-const SHORT_CODE_REGEX = /^[A-Za-z0-9\-_]{3,32}$/;
+// Spec requirement: Codes follow [A-Za-z0-9]{6,8}
+const SHORT_CODE_REGEX = /^[A-Za-z0-9]{6,8}$/;
+
+// Validate URL format
+const isValidUrl = (string) => {
+  try {
+    const url = new URL(string);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch (_) {
+    return false;
+  }
+};
 
 const buildOrderClause = (sort = "newest") => {
   if (sort === "oldest") return "ORDER BY created_at ASC";
@@ -31,6 +42,7 @@ const findExistingCode = async (code) => {
   return existing.rowCount > 0;
 };
 
+// Generate 6-character code (within spec range of 6-8)
 const generateUniqueCode = async () => {
   let code = nanoid(6);
   // small safeguard loop in case of collision
@@ -48,13 +60,18 @@ export const createShortUrl = async (req, res) => {
 
   if (!url) return res.status(400).json({ error: "Destination URL is required" });
 
+  // Validate URL format
+  if (!isValidUrl(url)) {
+    return res.status(400).json({ error: "Invalid URL format. Must be http:// or https://" });
+  }
+
   try {
     let code = customCode?.trim();
 
     if (code) {
       if (!SHORT_CODE_REGEX.test(code)) {
         return res.status(400).json({
-          error: "Custom code must be 3-32 chars and only letters, numbers, - or _"
+          error: "Custom code must be 6-8 characters and only letters or numbers (A-Za-z0-9)"
         });
       }
       const exists = await findExistingCode(code);
@@ -104,7 +121,8 @@ export const redirectUrl = async (req, res) => {
       [code]
     );
 
-    res.redirect(result.rows[0].original_url);
+    // HTTP 302 redirect as per spec
+    res.redirect(302, result.rows[0].original_url);
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
